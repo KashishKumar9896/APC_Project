@@ -24,7 +24,7 @@ public class VolunteerController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('VOLUNTEER')")
     public List<Volunteer> getAllVolunteers() {
         return volunteerService.getAllVolunteers();
     }

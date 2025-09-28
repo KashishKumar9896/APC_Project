@@ -39,14 +39,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/signup">Register</a>
-                    </li>
-                </ul>
+               
             </div>
         </div>
     </nav>
@@ -57,7 +50,7 @@
             <h1 class="display-4 fw-bold mb-4">Disaster Relief Management System</h1>
             <p class="lead mb-4">Connecting volunteers, managing donations, and coordinating relief efforts during disasters</p>
             <a href="/signup" class="btn btn-light btn-lg me-3">Join as Volunteer</a>
-            <a href="/login" class="btn btn-outline-light btn-lg">Admin Login</a>
+            <a href="/login" class="btn btn-outline-light btn-lg">Login</a>
         </div>
     </section>
 
@@ -143,7 +136,101 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        authToken = localStorage.getItem('token');
+        
         // Animate counters
+        async function loadVolunteers() {
+    try {
+        // 1. Fetch the volunteer data
+        const response = await fetch('/api/volunteers', {
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+        
+        
+        // 2. Check if the response was successful (status 200-299)
+        if (!response.ok) {
+            // Throw an error if the response status is not OK (e.g., 401, 500)
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // 3. Parse the JSON response
+        const volunteers = await response.json();
+        
+        // 4. Get the element to display the count
+        const volunteerCountElement = document.getElementById('volunteerCount');
+        
+        // 5. Check if the element exists
+        if (!volunteerCountElement) {
+            console.warn('Element with ID "volunteerCount" not found. Cannot display volunteer count.');
+            return;
+        }
+
+        // 6. Calculate the count
+        const count = volunteers.length;
+
+        // 7. Update the element's content
+        volunteerCountElement.textContent = count;
+
+        // Optional: Log the count
+        console.log(`Successfully loaded ${count} volunteers.`);
+
+    } catch (error) {
+        
+        // 8. Handle any errors during the fetch or parsing process
+        console.error('Error loading volunteers or displaying count:', error);
+        
+        // Optional: Update the count element to show an error message
+        const volunteerCountElement = document.getElementById('volunteerCount');
+        if (volunteerCountElement) {
+            volunteerCountElement.textContent = 'Error';
+            // You might want to style this error state as well
+        }
+    }
+}
+loadVolunteers();
+async function loadReliefCamps() {
+    try {
+        // 1. Fetch the relief camp data
+        const response = await fetch('/api/relief-camps', {
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+
+        // 2. Check for a successful response
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // 3. Parse the JSON response
+        const camps = await response.json();
+
+        // 4. Get the element to display the count (assuming ID 'campCount')
+        const campCountElement = document.getElementById('campCount');
+
+        if (!campCountElement) {
+            console.warn('Element with ID "campCount" not found. Cannot display camp count.');
+            return;
+        }
+
+        // 5. Calculate the count
+        const count = camps.length;
+
+        // 6. Update the element's content
+        campCountElement.textContent = count;
+
+        console.log(`Successfully loaded ${count} relief camps.`);
+
+    } catch (error) {
+        // 7. Handle any errors during the fetch or parsing process
+        console.error('Error loading relief camps or displaying count:', error);
+
+        // Optional: Update the count element to show an error message
+        const campCountElement = document.getElementById('campCount');
+        if (campCountElement) {
+            campCountElement.textContent = 'Error';
+        }
+    }
+}
+loadReliefCamps();
         function animateCounter(elementId, target) {
             const element = document.getElementById(elementId);
             let current = 0;
@@ -160,9 +247,8 @@
 
         // Start animations when page loads
         window.addEventListener('load', () => {
-            animateCounter('volunteerCount', 150);
-            animateCounter('donationCount', 500);
-            animateCounter('campCount', 25);
+            
+            
             animateCounter('reliefCount', 1000);
         });
     </script>
