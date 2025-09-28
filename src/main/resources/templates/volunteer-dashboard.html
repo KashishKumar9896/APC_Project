@@ -81,15 +81,11 @@
                         <a class="nav-link" href="#" data-section="profile">
                             <i class="fas fa-user me-2"></i>My Profile
                         </a>
-                        <a class="nav-link" href="#" data-section="donations">
-                            <i class="fas fa-donate me-2"></i>My Donations
-                        </a>
+                        
                         <a class="nav-link" href="#" data-section="camps">
                             <i class="fas fa-campground me-2"></i>Available Camps
                         </a>
-                        <a class="nav-link" href="#" data-section="tasks">
-                            <i class="fas fa-tasks me-2"></i>My Tasks
-                        </a>
+                        
                         <a class="nav-link" href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt me-2"></i>Logout
                         </a>
@@ -146,19 +142,12 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="content-card p-4">
-                                    <h5 class="mb-3">Recent Activities</h5>
-                                    <div id="recentActivities">
-                                        <p class="text-muted">Loading your activities...</p>
-                                    </div>
-                                </div>
-                            </div>
+                            
                             <div class="col-md-6">
                                 <div class="content-card p-4">
                                     <h5 class="mb-3">Available Relief Camps</h5>
                                     <div id="availableCamps">
-                                        <p class="text-muted">Loading available camps...</p>
+                                        <ul id="relief-camps-list"></ul>
                                     </div>
                                 </div>
                             </div>
@@ -176,39 +165,19 @@
                     </div>
 
                     <!-- Donations Section -->
-                    <div id="donations-section" style="display: none;">
-                        <div class="content-card p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5>My Donations</h5>
-                                <button class="btn btn-primary btn-sm" onclick="showCreateDonationModal()">
-                                    <i class="fas fa-plus me-2"></i>Make Donation
-                                </button>
-                            </div>
-                            <div id="myDonationsList">
-                                <p class="text-muted">Loading your donations...</p>
-                            </div>
-                        </div>
-                    </div>
+                   
 
                     <!-- Camps Section -->
-                    <div id="camps-section" style="display: none;">
+                   <div id="camps-section" style="display: none;">
                         <div class="content-card p-4">
-                            <h5 class="mb-3">Available Relief Camps</h5>
-                            <div id="campsList">
-                                <p class="text-muted">Loading available camps...</p>
+                        <h5 class="mb-3">Available Relief Camps</h5>
+                            <div id="campsList" class="row g-3">
+                        <!-- Camps will load here -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tasks Section -->
-                    <div id="tasks-section" style="display: none;">
-                        <div class="content-card p-4">
-                            <h5 class="mb-3">My Tasks</h5>
-                            <div id="tasksList">
-                                <p class="text-muted">Loading your tasks...</p>
-                            </div>
-                        </div>
-                    </div>
+                   
                 </div>
             </div>
         </div>
@@ -270,6 +239,7 @@
                 switch(sectionName) {
                     case 'overview':
                         loadVolunteerData();
+                        displayAvailableReliefCamps("relief-camps-list"); 
                         break;
                     case 'profile':
                         loadProfile();
@@ -278,7 +248,7 @@
                         loadMyDonations();
                         break;
                     case 'camps':
-                        loadAvailableCamps();
+                        displayAvailableReliefCamps("campsList"); 
                         break;
                     case 'tasks':
                         loadMyTasks();
@@ -304,6 +274,68 @@
             };
             return titles[sectionName] || 'Volunteer Dashboard';
         }
+        async function displayAvailableReliefCamps(targetContainerId = "relief-camps-list") {
+    try {
+        authToken = localStorage.getItem('token');
+        const response = await fetch('/api/relief-camps/available', {
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+
+        if (response.status === 403) {
+            console.error('403 error: Unauthorized access');
+            throw new Error('Unauthorized access');
+        }
+
+        const data = await response.json();
+        const container = document.getElementById(targetContainerId);
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted">No relief camps available</p>';
+            return;
+        }
+
+        // If rendering inside overview (ul list)
+        if (targetContainerId === "relief-camps-list") {
+            data.forEach(camp => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <h6>${camp.campName}</h6>
+                    <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i>${camp.city}, ${camp.state}</p>
+                `;
+                container.appendChild(listItem);
+            });
+        } 
+        // If rendering inside camps section (cards)
+        else if (targetContainerId === "campsList") {
+            data.forEach(camp => {
+                const campCard = document.createElement('div');
+                campCard.className = "col-md-6 col-lg-4";
+                campCard.innerHTML = `
+                    <div class="card shadow-sm border-0 rounded-3 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-success fw-bold">
+                                <i class="fas fa-campground me-2"></i>${camp.campName}
+                            </h5>
+                            <p class="card-text mb-1"><i class="fas fa-map-marker-alt me-2 text-danger"></i>${camp.location}</p>
+                            <p class="card-text mb-1"><i class="fas fa-city me-2 text-primary"></i>${camp.city}, ${camp.state}</p>
+                            <p class="card-text text-muted">
+                                <i class="fas fa-users me-2"></i>Capacity: ${camp.currentOccupancy}/${camp.capacity}
+                            </p>
+                            <button class="btn btn-sm btn-outline-success mt-2 w-100" onclick="joinCamp('${camp.id}')">
+                                <i class="fas fa-handshake me-1"></i>Join Camp
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(campCard);
+            });
+        }
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
 
         // Load volunteer data
         async function loadVolunteerData() {

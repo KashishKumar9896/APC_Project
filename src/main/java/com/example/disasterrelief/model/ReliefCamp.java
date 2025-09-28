@@ -16,7 +16,7 @@ public class ReliefCamp {
     private String id;
 
     @NotBlank
-    @Field("camp_name")
+    @Field("campName")
     private String campName;
 
     @NotBlank

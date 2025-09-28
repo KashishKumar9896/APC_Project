@@ -4,6 +4,8 @@ import com.example.disasterrelief.model.ReliefCamp;
 import com.example.disasterrelief.repository.ReliefCampRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,10 +15,13 @@ public class ReliefCampService {
     @Autowired
     private ReliefCampRepository reliefCampRepository;
 
+    public ReliefCampService(ReliefCampRepository reliefCampRepository) {
+        this.reliefCampRepository = reliefCampRepository;
+    }
+    
     public List<ReliefCamp> getAllReliefCamps() {
         return reliefCampRepository.findAll();
     }
-
     public Optional<ReliefCamp> getReliefCampById(String id) {
         return reliefCampRepository.findById(id);
     }

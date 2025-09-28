@@ -32,11 +32,7 @@ public class DonationController {
         return donation.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Donation> createDonation(@Valid @RequestBody Donation donation) {
-        Donation createdDonation = donationService.createDonation(donation);
-        return ResponseEntity.ok(createdDonation);
-    }
+    
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
@@ -82,25 +78,7 @@ public class DonationController {
         return donationService.getDonationsByDonor(donorEmail);
     }
 
-    @PutMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Donation> approveDonation(@PathVariable String id, @RequestParam String approvedBy) {
-        Donation donation = donationService.approveDonation(id, approvedBy);
-        if (donation != null) {
-            return ResponseEntity.ok(donation);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @PutMapping("/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Donation> rejectDonation(@PathVariable String id, @RequestParam String notes) {
-        Donation donation = donationService.rejectDonation(id, notes);
-        if (donation != null) {
-            return ResponseEntity.ok(donation);
-        }
-        return ResponseEntity.notFound().build();
-    }
+   
 
     @PutMapping("/{id}/distribute")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")

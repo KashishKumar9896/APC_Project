@@ -20,7 +20,6 @@ public class ReliefCampController {
     private ReliefCampService reliefCampService;
 
     @GetMapping
-    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
     public List<ReliefCamp> getAllReliefCamps() {
         return reliefCampService.getAllReliefCamps();
     }
@@ -28,6 +27,10 @@ public class ReliefCampController {
     @GetMapping("/public")
     public List<ReliefCamp> getPublicReliefCamps() {
         return reliefCampService.getReliefCampsByStatus("ACTIVE");
+    }
+    @GetMapping("/all")
+    public List<ReliefCamp> getAllReliefCam() {
+        return reliefCampService.getAllReliefCamps();
     }
 
     @GetMapping("/{id}")
@@ -84,8 +87,8 @@ public class ReliefCampController {
 
     @GetMapping("/available")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public List<ReliefCamp> getAvailableReliefCamps() {
-        return reliefCampService.getAvailableReliefCamps();
+    public List<ReliefCamp> getallReliefCamps() {
+        return reliefCampService.getAllReliefCamps();
     }
 
     @PostMapping("/{campId}/volunteers/{volunteerId}")
