@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Disaster Relief Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .signup-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .signup-header {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-signup {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .skill-tag {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .skill-tag:hover {
+            background: #667eea;
+            color: white;
+        }
+        .skill-tag.selected {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="signup-card">
+                    <div class="signup-header">
+                        <i class="fas fa-user-plus fa-3x mb-3"></i>
+                        <h3 class="mb-0">Join Our Mission</h3>
+                        <p class="mb-0">Register as a volunteer</p>
+                    </div>
+                    <div class="p-4">
+                        <form id="signupForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" name="address" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city" name="city" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="state" class="form-label">State</label>
+                                    <input type="text" class="form-control" id="state" name="state" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="zipCode" class="form-label">ZIP Code</label>
+                                    <input type="text" class="form-control" id="zipCode" name="zipCode" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Skills (Select all that apply)</label>
+                                <div class="skills-container">
+                                    <span class="skill-tag" data-skill="Medical">Medical</span>
+                                    <span class="skill-tag" data-skill="First Aid">First Aid</span>
+                                    <span class="skill-tag" data-skill="Cooking">Cooking</span>
+                                    <span class="skill-tag" data-skill="Transportation">Transportation</span>
+                                    <span class="skill-tag" data-skill="Communication">Communication</span>
+                                    <span class="skill-tag" data-skill="Construction">Construction</span>
+                                    <span class="skill-tag" data-skill="Logistics">Logistics</span>
+                                    <span class="skill-tag" data-skill="Counseling">Counseling</span>
+                                </div>
+                                <input type="hidden" id="skills" name="skills">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-signup">
+                                    <i class="fas fa-user-plus me-2"></i>Register as Volunteer
+                                </button>
+                            </div>
+                        </form>
+                        <div class="text-center mt-4">
+                            <p class="mb-0">Already have an account? <a href="/login" class="text-decoration-none">Sign in here</a></p>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="/" class="text-decoration-none">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle skill selection
+        document.querySelectorAll('.skill-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updateSkillsInput();
+            });
+        });
+
+        function updateSkillsInput() {
+            const selectedSkills = Array.from(document.querySelectorAll('.skill-tag.selected'))
+                .map(tag => tag.dataset.skill);
+            document.getElementById('skills').value = selectedSkills.join(',');
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const signupData = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                phoneNumber: formData.get('phoneNumber'),
+                address: formData.get('address'),
+                city: formData.get('city'),
+                state: formData.get('state'),
+                zipCode: formData.get('zipCode'),
+                skills: formData.get('skills').split(',').filter(skill => skill.trim() !== '')
+            };
+
+            try {
+                const response = await fetch('/api/volunteers/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(signupData)
+                });
+
+                if (response.ok) {
+                    alert('Registration successful! Please login with your credentials.');
+                    window.location.href = '/login';
+                } else {
+                    const error = await response.text();
+                    alert('Registration failed: ' + error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Registration failed. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

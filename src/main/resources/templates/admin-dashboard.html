@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Disaster Relief Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .main-content {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 25px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .admin-badge {
+            background: linear-gradient(45deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .critical-alert {
+            background: linear-gradient(45deg, #dc3545 0%, #ff6b6b 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-0">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-crown me-2"></i>
+                        Admin Portal
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#" data-section="overview">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="#" data-section="volunteers">
+                            <i class="fas fa-users me-2"></i>Manage Volunteers
+                        </a>
+                        <a class="nav-link" href="#" data-section="donations">
+                            <i class="fas fa-donate me-2"></i>Manage Donations
+                        </a>
+                        <a class="nav-link" href="#" data-section="relief-camps">
+                            <i class="fas fa-campground me-2"></i>Manage Relief Camps
+                        </a>
+                        <a class="nav-link" href="#" data-section="reports">
+                            <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+                        </a>
+                        <a class="nav-link" href="#" data-section="settings">
+                            <i class="fas fa-cog me-2"></i>System Settings
+                        </a>
+                        <a class="nav-link" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 id="pageTitle">Admin Dashboard</h2>
+                        <div class="d-flex align-items-center">
+                            <span class="admin-badge me-3">ADMIN</span>
+                            <span class="me-3">Welcome, <span id="userName">Admin</span></span>
+                            <button class="btn btn-primary" onclick="showSystemStatus()">
+                                <i class="fas fa-server me-2"></i>System Status
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Critical Alerts -->
+                    <div id="criticalAlerts" style="display: none;">
+                        <div class="critical-alert">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Critical Alerts</h6>
+                            <div id="alertContent">
+                                <!-- Alerts will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overview Section -->
+                    <div id="overview-section">
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="stats-card p-4 text-center">
+                                    <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                                    <h3 id="totalVolunteers">0</h3>
+                                    <p class="mb-0">Total Volunteers</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stats-card p-4 text-center">
+                                    <i class="fas fa-donate fa-2x text-success mb-3"></i>
+                                    <h3 id="totalDonations">0</h3>
+                                    <p class="mb-0">Total Donations</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stats-card p-4 text-center">
+                                    <i class="fas fa-campground fa-2x text-warning mb-3"></i>
+                                    <h3 id="totalCamps">0</h3>
+                                    <p class="mb-0">Relief Camps</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stats-card p-4 text-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                                    <h3 id="pendingApprovals">0</h3>
+                                    <p class="mb-0">Pending Approvals</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="content-card p-4">
+                                    <h5 class="mb-3">Recent System Activity</h5>
+                                    <div id="recentActivity">
+                                        <p class="text-muted">Loading system activity...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="content-card p-4">
+                                    <h5 class="mb-3">Quick Actions</h5>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" onclick="showAddVolunteerModal()">
+                                            <i class="fas fa-user-plus me-2"></i>Add New Volunteer
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="showAddCampModal()">
+                                            <i class="fas fa-campground me-2"></i>Create Relief Camp
+                                        </button>
+                                        <button class="btn btn-outline-success" onclick="showApprovalQueue()">
+                                            <i class="fas fa-check-circle me-2"></i>Review Pending Approvals
+                                        </button>
+                                        <button class="btn btn-outline-info" onclick="showReports()">
+                                            <i class="fas fa-chart-line me-2"></i>Generate Reports
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volunteers Section -->
+                    <div id="volunteers-section" style="display: none;">
+                        <div class="content-card p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Volunteer Management</h5>
+                                <button class="btn btn-primary btn-sm" onclick="showAddVolunteerModal()">
+                                    <i class="fas fa-plus me-2"></i>Add Volunteer
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>City</th>
+                                            <th>Status</th>
+                                            <th>Role</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="volunteersTable">
+                                        <tr>
+                                            <td colspan="7" class="text-center">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donations Section -->
+                    <div id="donations-section" style="display: none;">
+                        <div class="content-card p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Donation Management</h5>
+                                <div>
+                                    <button class="btn btn-success btn-sm me-2" onclick="approveAllPending()">
+                                        <i class="fas fa-check me-1"></i>Approve All Pending
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" onclick="showAddDonationModal()">
+                                        <i class="fas fa-plus me-2"></i>Add Donation
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Donor</th>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="donationsTable">
+                                        <tr>
+                                            <td colspan="6" class="text-center">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Relief Camps Section -->
+                    <div id="relief-camps-section" style="display: none;">
+                        <div class="content-card p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Relief Camp Management</h5>
+                                <button class="btn btn-primary btn-sm" onclick="showAddCampModal()">
+                                    <i class="fas fa-plus me-2"></i>Add Camp
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Camp Name</th>
+                                            <th>Location</th>
+                                            <th>Capacity</th>
+                                            <th>Occupancy</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="campsTable">
+                                        <tr>
+                                            <td colspan="6" class="text-center">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Section -->
+                    <div id="reports-section" style="display: none;">
+                        <div class="content-card p-4">
+                            <h5 class="mb-3">Reports & Analytics</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Volunteer Statistics</h6>
+                                            <canvas id="volunteerChart" width="400" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Donation Trends</h6>
+                                            <canvas id="donationChart" width="400" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div id="settings-section" style="display: none;">
+                        <div class="content-card p-4">
+                            <h5 class="mb-3">System Settings</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>User Management</h6>
+                                    <button class="btn btn-outline-primary me-2" onclick="promoteToAdmin()">
+                                        <i class="fas fa-user-shield me-1"></i>Promote to Admin
+                                    </button>
+                                    <button class="btn btn-outline-warning" onclick="demoteFromAdmin()">
+                                        <i class="fas fa-user-minus me-1"></i>Demote from Admin
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>System Configuration</h6>
+                                    <button class="btn btn-outline-info me-2" onclick="backupData()">
+                                        <i class="fas fa-download me-1"></i>Backup Data
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="resetSystem()">
+                                        <i class="fas fa-trash me-1"></i>Reset System
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let currentUser = null;
+        let authToken = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            authToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            if (!authToken || !currentUser) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Check if user is admin
+            if (currentUser.role !== 'ADMIN') {
+                window.location.href = '/volunteer-dashboard';
+                return;
+            }
+
+            document.getElementById('userName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+            loadAdminData();
+            setupNavigation();
+        });
+
+        // Navigation setup
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                document.getElementById('pageTitle').textContent = getSectionTitle(sectionName);
+                
+                // Load section data
+                switch(sectionName) {
+                    case 'overview':
+                        loadAdminData();
+                        break;
+                    case 'volunteers':
+                        loadVolunteers();
+                        break;
+                    case 'donations':
+                        loadDonations();
+                        break;
+                    case 'relief-camps':
+                        loadReliefCamps();
+                        break;
+                    case 'reports':
+                        loadReports();
+                        break;
+                    case 'settings':
+                        loadSettings();
+                        break;
+                }
+            }
+
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+        }
+
+        // Get section title
+        function getSectionTitle(sectionName) {
+            const titles = {
+                'overview': 'Admin Dashboard',
+                'volunteers': 'Volunteer Management',
+                'donations': 'Donation Management',
+                'relief-camps': 'Relief Camp Management',
+                'reports': 'Reports & Analytics',
+                'settings': 'System Settings'
+            };
+            return titles[sectionName] || 'Admin Dashboard';
+        }
+
+        // Load admin data
+        async function loadAdminData() {
+            try {
+                // Load volunteers
+                const volunteersResponse = await fetch('/api/volunteers', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const volunteers = await volunteersResponse.json();
+                document.getElementById('totalVolunteers').textContent = volunteers.length;
+
+                // Load donations
+                const donationsResponse = await fetch('/api/donations', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const donations = await donationsResponse.json();
+                document.getElementById('totalDonations').textContent = donations.length;
+
+                // Count pending approvals
+                const pendingDonations = donations.filter(d => d.status === 'PENDING');
+                document.getElementById('pendingApprovals').textContent = pendingDonations.length;
+
+                // Load relief camps
+                const campsResponse = await fetch('/api/relief-camps', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const camps = await campsResponse.json();
+                document.getElementById('totalCamps').textContent = camps.length;
+
+                // Load recent activity
+                loadRecentActivity(volunteers, donations, camps);
+
+                // Show critical alerts if any
+                if (pendingDonations.length > 0) {
+                    showCriticalAlerts(pendingDonations.length);
+                }
+
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+            }
+        }
+
+        // Show critical alerts
+        function showCriticalAlerts(pendingCount) {
+            document.getElementById('criticalAlerts').style.display = 'block';
+            document.getElementById('alertContent').innerHTML = `
+                <p class="mb-0">⚠️ ${pendingCount} donations are pending approval and require immediate attention.</p>
+            `;
+        }
+
+        // Load recent activity
+        function loadRecentActivity(volunteers, donations, camps) {
+            const container = document.getElementById('recentActivity');
+            const activities = [];
+            
+            // Add recent volunteers
+            volunteers.slice(0, 2).forEach(volunteer => {
+                activities.push({
+                    icon: 'fas fa-user-plus',
+                    text: `New volunteer registered: ${volunteer.firstName} ${volunteer.lastName}`,
+                    time: new Date(volunteer.createdAt).toLocaleDateString(),
+                    color: 'text-success'
+                });
+            });
+
+            // Add recent donations
+            donations.slice(0, 2).forEach(donation => {
+                activities.push({
+                    icon: 'fas fa-donate',
+                    text: `New donation: ${donation.donationType} - $${donation.amount}`,
+                    time: new Date(donation.createdAt).toLocaleDateString(),
+                    color: 'text-primary'
+                });
+            });
+
+            if (activities.length === 0) {
+                container.innerHTML = '<p class="text-muted">No recent activity</p>';
+                return;
+            }
+
+            const html = activities.map(activity => `
+                <div class="d-flex align-items-center py-2 border-bottom">
+                    <i class="${activity.icon} ${activity.color} me-3"></i>
+                    <div class="flex-grow-1">
+                        <div>${activity.text}</div>
+                        <small class="text-muted">${activity.time}</small>
+                    </div>
+                </div>
+            `).join('');
+            container.innerHTML = html;
+        }
+
+        // Load volunteers
+        async function loadVolunteers() {
+            try {
+                const response = await fetch('/api/volunteers', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const volunteers = await response.json();
+                
+                const tbody = document.getElementById('volunteersTable');
+                if (volunteers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No volunteers found</td></tr>';
+                    return;
+                }
+
+                const html = volunteers.map(volunteer => `
+                    <tr>
+                        <td>${volunteer.firstName} ${volunteer.lastName}</td>
+                        <td>${volunteer.email}</td>
+                        <td>${volunteer.phoneNumber}</td>
+                        <td>${volunteer.city}</td>
+                        <td><span class="badge bg-${volunteer.isAvailable ? 'success' : 'secondary'}">${volunteer.isAvailable ? 'Available' : 'Busy'}</span></td>
+                        <td><span class="badge bg-${volunteer.role === 'ADMIN' ? 'danger' : 'primary'}">${volunteer.role}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editVolunteer('${volunteer.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteVolunteer('${volunteer.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading volunteers:', error);
+            }
+        }
+
+        // Load donations
+        async function loadDonations() {
+            try {
+                const response = await fetch('/api/donations', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const donations = await response.json();
+                
+                const tbody = document.getElementById('donationsTable');
+                if (donations.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No donations found</td></tr>';
+                    return;
+                }
+
+                const html = donations.map(donation => `
+                    <tr>
+                        <td>${donation.donorName}</td>
+                        <td>${donation.donationType}</td>
+                        <td>$${donation.amount}</td>
+                        <td><span class="badge bg-${getStatusColor(donation.status)}">${donation.status}</span></td>
+                        <td>${new Date(donation.createdAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-success me-1" onclick="approveDonation('${donation.id}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="rejectDonation('${donation.id}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading donations:', error);
+            }
+        }
+
+        // Load relief camps
+        async function loadReliefCamps() {
+            try {
+                const response = await fetch('/api/relief-camps', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const camps = await response.json();
+                
+                const tbody = document.getElementById('campsTable');
+                if (camps.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No relief camps found</td></tr>';
+                    return;
+                }
+
+                const html = camps.map(camp => `
+                    <tr>
+                        <td>${camp.campName}</td>
+                        <td>${camp.city}, ${camp.state}</td>
+                        <td>${camp.capacity}</td>
+                        <td>${camp.currentOccupancy || 0}</td>
+                        <td><span class="badge bg-${getStatusColor(camp.status)}">${camp.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editCamp('${camp.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteCamp('${camp.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading relief camps:', error);
+            }
+        }
+
+        // Load reports
+        function loadReports() {
+            // Initialize charts
+            const volunteerCtx = document.getElementById('volunteerChart').getContext('2d');
+            new Chart(volunteerCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Available', 'Busy'],
+                    datasets: [{
+                        data: [12, 3],
+                        backgroundColor: ['#28a745', '#6c757d']
+                    }]
+                }
+            });
+
+            const donationCtx = document.getElementById('donationChart').getContext('2d');
+            new Chart(donationCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Donations',
+                        data: [12, 19, 3, 5, 2],
+                        borderColor: '#dc3545',
+                        tension: 0.1
+                    }]
+                }
+            });
+        }
+
+        // Load settings
+        function loadSettings() {
+            // Settings functionality will be implemented here
+        }
+
+        // Get status color
+        function getStatusColor(status) {
+            const colors = {
+                'PENDING': 'warning',
+                'APPROVED': 'success',
+                'REJECTED': 'danger',
+                'DISTRIBUTED': 'info',
+                'ACTIVE': 'success',
+                'INACTIVE': 'secondary',
+                'FULL': 'warning',
+                'CLOSED': 'danger'
+            };
+            return colors[status] || 'secondary';
+        }
+
+        // Admin action functions
+        function showAddVolunteerModal() {
+            alert('Add volunteer functionality will be implemented here');
+        }
+
+        function showAddDonationModal() {
+            alert('Add donation functionality will be implemented here');
+        }
+
+        function showAddCampModal() {
+            alert('Add camp functionality will be implemented here');
+        }
+
+        function showApprovalQueue() {
+            alert('Approval queue functionality will be implemented here');
+        }
+
+        function showReports() {
+            showSection('reports');
+        }
+
+        function showSystemStatus() {
+            alert('System status: All systems operational');
+        }
+
+        function approveAllPending() {
+            alert('Approve all pending functionality will be implemented here');
+        }
+
+        function editVolunteer(id) {
+            alert('Edit volunteer functionality will be implemented here');
+        }
+
+        function deleteVolunteer(id) {
+            if (confirm('Are you sure you want to delete this volunteer?')) {
+                alert('Delete volunteer functionality will be implemented here');
+            }
+        }
+
+        function approveDonation(id) {
+            alert('Approve donation functionality will be implemented here');
+        }
+
+        function rejectDonation(id) {
+            alert('Reject donation functionality will be implemented here');
+        }
+
+        function editCamp(id) {
+            alert('Edit camp functionality will be implemented here');
+        }
+
+        function deleteCamp(id) {
+            if (confirm('Are you sure you want to delete this relief camp?')) {
+                alert('Delete camp functionality will be implemented here');
+            }
+        }
+
+        function promoteToAdmin() {
+            alert('Promote to admin functionality will be implemented here');
+        }
+
+        function demoteFromAdmin() {
+            alert('Demote from admin functionality will be implemented here');
+        }
+
+        function backupData() {
+            alert('Backup data functionality will be implemented here');
+        }
+
+        function resetSystem() {
+            if (confirm('Are you sure you want to reset the system? This action cannot be undone!')) {
+                alert('Reset system functionality will be implemented here');
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
