@@ -22,8 +22,6 @@ public class DonationService {
     }
 
     public Donation createDonation(Donation donation) {
-        donation.setCreatedAt(java.time.LocalDateTime.now());
-        donation.setUpdatedAt(java.time.LocalDateTime.now());
         return donationRepository.save(donation);
     }
 
@@ -31,16 +29,9 @@ public class DonationService {
         Optional<Donation> optionalDonation = donationRepository.findById(id);
         if (optionalDonation.isPresent()) {
             Donation donation = optionalDonation.get();
-            donation.setDonorName(donationDetails.getDonorName());
-            donation.setDonorEmail(donationDetails.getDonorEmail());
-            donation.setDonorPhone(donationDetails.getDonorPhone());
-            donation.setDonationType(donationDetails.getDonationType());
+            donation.setName(donationDetails.getName());
+            donation.setEmail(donationDetails.getEmail());
             donation.setAmount(donationDetails.getAmount());
-            donation.setDescription(donationDetails.getDescription());
-            donation.setReliefCampId(donationDetails.getReliefCampId());
-            donation.setStatus(donationDetails.getStatus());
-            donation.setNotes(donationDetails.getNotes());
-            donation.setUpdatedAt(java.time.LocalDateTime.now());
             return donationRepository.save(donation);
         }
         return null;
@@ -52,56 +43,5 @@ public class DonationService {
             return true;
         }
         return false;
-    }
-
-    public List<Donation> getDonationsByStatus(String status) {
-        return donationRepository.findByStatus(status);
-    }
-
-    public List<Donation> getDonationsByType(String donationType) {
-        return donationRepository.findByDonationType(donationType);
-    }
-
-    public List<Donation> getDonationsByReliefCamp(String reliefCampId) {
-        return donationRepository.findByReliefCampId(reliefCampId);
-    }
-
-    public List<Donation> getDonationsByDonor(String donorEmail) {
-        return donationRepository.findByDonorEmail(donorEmail);
-    }
-
-    public Donation approveDonation(String id, String approvedBy) {
-        Optional<Donation> optionalDonation = donationRepository.findById(id);
-        if (optionalDonation.isPresent()) {
-            Donation donation = optionalDonation.get();
-            donation.setStatus("APPROVED");
-            donation.setApprovedBy(approvedBy);
-            donation.setUpdatedAt(java.time.LocalDateTime.now());
-            return donationRepository.save(donation);
-        }
-        return null;
-    }
-
-    public Donation rejectDonation(String id, String notes) {
-        Optional<Donation> optionalDonation = donationRepository.findById(id);
-        if (optionalDonation.isPresent()) {
-            Donation donation = optionalDonation.get();
-            donation.setStatus("REJECTED");
-            donation.setNotes(notes);
-            donation.setUpdatedAt(java.time.LocalDateTime.now());
-            return donationRepository.save(donation);
-        }
-        return null;
-    }
-
-    public Donation distributeDonation(String id) {
-        Optional<Donation> optionalDonation = donationRepository.findById(id);
-        if (optionalDonation.isPresent()) {
-            Donation donation = optionalDonation.get();
-            donation.setStatus("DISTRIBUTED");
-            donation.setUpdatedAt(java.time.LocalDateTime.now());
-            return donationRepository.save(donation);
-        }
-        return null;
     }
 }

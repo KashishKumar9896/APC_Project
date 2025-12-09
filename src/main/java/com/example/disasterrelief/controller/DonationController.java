@@ -32,7 +32,11 @@ public class DonationController {
         return donation.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    
+    @PostMapping("/create")
+    public ResponseEntity<Donation> createDonation(@Valid @RequestBody Donation donation) {
+        Donation createdDonation = donationService.createDonation(donation);
+        return ResponseEntity.ok(createdDonation);
+    }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
@@ -50,42 +54,6 @@ public class DonationController {
         boolean deleted = donationService.deleteDonation(id);
         if (deleted) {
             return ResponseEntity.ok("Donation deleted successfully");
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/status/{status}")
-    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public List<Donation> getDonationsByStatus(@PathVariable String status) {
-        return donationService.getDonationsByStatus(status);
-    }
-
-    @GetMapping("/type/{type}")
-    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public List<Donation> getDonationsByType(@PathVariable String type) {
-        return donationService.getDonationsByType(type);
-    }
-
-    @GetMapping("/relief-camp/{reliefCampId}")
-    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public List<Donation> getDonationsByReliefCamp(@PathVariable String reliefCampId) {
-        return donationService.getDonationsByReliefCamp(reliefCampId);
-    }
-
-    @GetMapping("/donor/{donorEmail}")
-    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public List<Donation> getDonationsByDonor(@PathVariable String donorEmail) {
-        return donationService.getDonationsByDonor(donorEmail);
-    }
-
-   
-
-    @PutMapping("/{id}/distribute")
-    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public ResponseEntity<Donation> distributeDonation(@PathVariable String id) {
-        Donation donation = donationService.distributeDonation(id);
-        if (donation != null) {
-            return ResponseEntity.ok(donation);
         }
         return ResponseEntity.notFound().build();
     }
