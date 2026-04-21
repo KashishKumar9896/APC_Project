@@ -148,6 +148,14 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="content-card p-4">
+                                    <h5 class="mb-3">My Joined Camps</h5>
+                                    <div id="myJoinedCampsList">
+                                        <p class="text-muted">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -166,10 +174,17 @@
 
                     <!-- Camps Section -->
                    <div id="camps-section" style="display: none;">
+                        <div class="content-card p-4 mb-4">
+                            <h5 class="mb-3">My Joined Camps</h5>
+                            <div id="myJoinedCampsSection" class="row g-3">
+                        <!-- Joined camps will load here -->
+                            </div>
+                        </div>
+
                         <div class="content-card p-4">
-                        <h5 class="mb-3">Available Relief Camps</h5>
+                            <h5 class="mb-3">Available Relief Camps</h5>
                             <div id="campsList" class="row g-3">
-                        <!-- Camps will load here -->
+                        <!-- Available camps will load here -->
                             </div>
                         </div>
                     </div>
@@ -258,7 +273,8 @@
                 switch(sectionName) {
                     case 'overview':
                         loadVolunteerData();
-                        displayAvailableReliefCamps("relief-camps-list"); 
+                        displayAvailableReliefCamps("relief-camps-list");
+                        loadMyJoinedCamps();
                         break;
                     case 'profile':
                         loadProfile();
@@ -543,7 +559,127 @@
 
         // Join camp
         function joinCamp(campId) {
-            alert('Join camp functionality will be implemented here');
+            authToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            fetch(`/api/relief-camps/${campId}/volunteers/${currentUser.id}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + authToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || 'Failed to join camp');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Successfully joined relief camp!');
+                // Refresh the camps list
+                displayAvailableReliefCamps("campsList");
+                loadVolunteerData();
+            })
+            .catch(error => {
+                console.error('Error joining camp:', error);
+                alert('Error joining camp: ' + error.message);
+            });
+        }
+
+        // Leave camp
+        function leaveCamp(campId) {
+            if (confirm('Are you sure you want to leave this relief camp?')) {
+                authToken = localStorage.getItem('token');
+                currentUser = JSON.parse(localStorage.getItem('user'));
+                
+                fetch(`/api/relief-camps/${campId}/volunteers/${currentUser.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(text || 'Failed to leave camp');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('You have left the relief camp');
+                    // Refresh the camps list and data
+                    loadMyJoinedCamps();
+                    loadVolunteerData();
+                })
+                .catch(error => {
+                    console.error('Error leaving camp:', error);
+                    alert('Error leaving camp: ' + error.message);
+                });
+            }
+        }
+
+        // Load camps the volunteer has joined
+        async function loadMyJoinedCamps() {
+            try {
+                authToken = localStorage.getItem('token');
+                currentUser = JSON.parse(localStorage.getItem('user'));
+                
+                const response = await fetch('/api/relief-camps', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const camps = await response.json();
+                
+                // Filter camps where current volunteer is in the volunteerIds
+                const myJoinedCamps = camps.filter(camp => 
+                    camp.volunteerIds && camp.volunteerIds.includes(currentUser.id)
+                );
+                
+                const container = document.getElementById('myJoinedCampsList');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                if (myJoinedCamps.length === 0) {
+                    container.innerHTML = '<p class="text-muted">You haven\'t joined any camps yet. Visit "Available Camps" to join one!</p>';
+                    return;
+                }
+                
+                myJoinedCamps.forEach(camp => {
+                    const campCard = document.createElement('div');
+                    campCard.className = "col-md-6 col-lg-4";
+                    campCard.innerHTML = `
+                        <div class="card shadow-sm border-0 rounded-3 h-100 border-success">
+                            <div class="card-body">
+                                <h5 class="card-title text-success fw-bold">
+                                    <i class="fas fa-campground me-2"></i>${camp.campName}
+                                </h5>
+                                <p class="card-text mb-1"><i class="fas fa-map-marker-alt me-2 text-danger"></i>${camp.location}</p>
+                                <p class="card-text mb-1"><i class="fas fa-city me-2 text-primary"></i>${camp.city}, ${camp.state}</p>
+                                <p class="card-text mb-1"><i class="fas fa-phone me-2 text-info"></i>${camp.managerPhone}</p>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-users me-2"></i>Occupancy: ${camp.currentOccupancy}/${camp.capacity}
+                                </p>
+                                <span class="badge bg-success me-2 mb-3">Joined</span>
+                                <span class="badge bg-${getStatusColor(camp.status)} mb-3">${camp.status}</span>
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-danger w-100" onclick="leaveCamp('${camp.id}')">
+                                        <i class="fas fa-door-open me-1"></i>Leave Camp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(campCard);
+                });
+                
+            } catch (error) {
+                console.error('Error loading joined camps:', error);
+            }
         }
 
         // Show help modal

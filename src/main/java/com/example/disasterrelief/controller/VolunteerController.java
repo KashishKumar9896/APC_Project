@@ -57,6 +57,11 @@ public class VolunteerController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
     public ResponseEntity<Volunteer> updateVolunteer(@PathVariable String id, @Valid @RequestBody Volunteer volunteerDetails) {
+        // Encode password if provided and not empty
+        if (volunteerDetails.getPassword() != null && !volunteerDetails.getPassword().isEmpty()) {
+            volunteerDetails.setPassword(passwordEncoder.encode(volunteerDetails.getPassword()));
+        }
+        
         Volunteer updatedVolunteer = volunteerService.updateVolunteer(id, volunteerDetails);
         if (updatedVolunteer != null) {
             return ResponseEntity.ok(updatedVolunteer);

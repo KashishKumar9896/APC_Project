@@ -47,6 +47,12 @@ public class VolunteerService {
             volunteer.setEmergencyContact(volunteerDetails.getEmergencyContact());
             volunteer.setEmergencyPhone(volunteerDetails.getEmergencyPhone());
             volunteer.setAvailable(volunteerDetails.isAvailable());
+            
+            // Update password only if provided and not empty
+            if (volunteerDetails.getPassword() != null && !volunteerDetails.getPassword().isEmpty()) {
+                volunteer.setPassword(volunteerDetails.getPassword());
+            }
+            
             volunteer.setUpdatedAt(java.time.LocalDateTime.now());
             return volunteerRepository.save(volunteer);
         }

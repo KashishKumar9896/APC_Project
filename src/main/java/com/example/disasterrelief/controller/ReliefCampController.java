@@ -93,22 +93,43 @@ public class ReliefCampController {
 
     @PostMapping("/{campId}/volunteers/{volunteerId}")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public ResponseEntity<ReliefCamp> addVolunteerToCamp(@PathVariable String campId, @PathVariable String volunteerId) {
+    public ResponseEntity<?> addVolunteerToCamp(@PathVariable String campId, @PathVariable String volunteerId) {
+        Optional<ReliefCamp> optional = reliefCampService.getReliefCampById(campId);
+        if (optional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        ReliefCamp camp = optional.get();
+        if (camp.isFull()) {
+            return ResponseEntity.badRequest().body("Camp is full");
+        }
+        if (camp.getVolunteerIds() != null && camp.getVolunteerIds().contains(volunteerId)) {
+            return ResponseEntity.badRequest().body("Volunteer already joined this camp");
+        }
+
         ReliefCamp reliefCamp = reliefCampService.addVolunteerToCamp(campId, volunteerId);
         if (reliefCamp != null) {
             return ResponseEntity.ok(reliefCamp);
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(500).body("Unable to add volunteer to camp");
     }
 
     @DeleteMapping("/{campId}/volunteers/{volunteerId}")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
-    public ResponseEntity<ReliefCamp> removeVolunteerFromCamp(@PathVariable String campId, @PathVariable String volunteerId) {
+    public ResponseEntity<?> removeVolunteerFromCamp(@PathVariable String campId, @PathVariable String volunteerId) {
+        Optional<ReliefCamp> optional = reliefCampService.getReliefCampById(campId);
+        if (optional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        ReliefCamp camp = optional.get();
+        if (camp.getVolunteerIds() == null || !camp.getVolunteerIds().contains(volunteerId)) {
+            return ResponseEntity.badRequest().body("Volunteer not assigned to this camp");
+        }
+
         ReliefCamp reliefCamp = reliefCampService.removeVolunteerFromCamp(campId, volunteerId);
         if (reliefCamp != null) {
             return ResponseEntity.ok(reliefCamp);
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(500).body("Unable to remove volunteer from camp");
     }
 
     

@@ -84,10 +84,15 @@ public class ReliefCampService {
         if (optionalReliefCamp.isPresent()) {
             ReliefCamp reliefCamp = optionalReliefCamp.get();
             if (!reliefCamp.isFull()) {
-                reliefCamp.getVolunteerIds().add(volunteerId);
-                reliefCamp.setCurrentOccupancy(reliefCamp.getCurrentOccupancy() + 1);
-                reliefCamp.setUpdatedAt(java.time.LocalDateTime.now());
-                return reliefCampRepository.save(reliefCamp);
+                boolean added = reliefCamp.getVolunteerIds().add(volunteerId);
+                if (added) {
+                    Integer occ = reliefCamp.getCurrentOccupancy();
+                    reliefCamp.setCurrentOccupancy((occ == null ? 0 : occ) + 1);
+                    reliefCamp.setUpdatedAt(java.time.LocalDateTime.now());
+                    return reliefCampRepository.save(reliefCamp);
+                }
+                // already present; return existing camp without changing occupancy
+                return reliefCamp;
             }
         }
         return null;
