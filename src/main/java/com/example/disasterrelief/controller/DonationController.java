@@ -38,6 +38,13 @@ public class DonationController {
         return ResponseEntity.ok(createdDonation);
     }
 
+    @GetMapping("/donor/{email}")
+    @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
+    public ResponseEntity<List<Donation>> getDonationsByDonor(@PathVariable String email) {
+        List<Donation> donations = donationService.getDonationsByEmail(email);
+        return ResponseEntity.ok(donations);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('VOLUNTEER') or hasRole('ADMIN')")
     public ResponseEntity<Donation> updateDonation(@PathVariable String id, @Valid @RequestBody Donation donationDetails) {

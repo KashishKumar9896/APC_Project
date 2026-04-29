@@ -44,4 +44,8 @@ public class DonationService {
         }
         return false;
     }
+
+    public List<Donation> getDonationsByEmail(String email) {
+        return donationRepository.findByEmail(email);
+    }
 }

@@ -59,7 +59,9 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Allow public frontend routes and static assets
                 .requestMatchers("/", "/login", "/signup", "/dashboard", "/volunteer-dashboard", "/admin-dashboard", "/health", "/api").permitAll()
+                .requestMatchers("/favicon.ico", "/css/**", "/js/**", "/images/**", "/static/**", "/webjars/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/volunteers/register").permitAll()
                 .requestMatchers("/api/donations/create").permitAll()
