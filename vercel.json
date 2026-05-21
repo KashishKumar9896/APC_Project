@@ -1,0 +1,12 @@
+{
+  "buildCommand": "mvn clean package -DskipTests",
+  "outputDirectory": "target",
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "MONGODB_DB": "@mongodb_db",
+    "JWT_SECRET": "@jwt_secret",
+    "JWT_EXPIRATION": "@jwt_expiration",
+    "GEOAPIFY_API_KEY": "@geoapify_api_key",
+    "SERVER_PORT": "8080"
+  }
+}
